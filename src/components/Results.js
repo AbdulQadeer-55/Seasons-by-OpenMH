@@ -1,3 +1,4 @@
+import HealthChart from '@/components/HealthChart';
 // This component will receive all the data from our API
 export default function Results({ data }) {
   
@@ -19,16 +20,16 @@ export default function Results({ data }) {
         </ul>
       </div>
 
-      {/* 2. Health Chart Section (Placeholder) */}
-      <div className="p-4 bg-gray-800 border border-gray-700 rounded-lg">
-        <h3 className="text-2xl font-bold text-white mb-3">
-          Local Health Indicators
-        </h3>
-        {/* We will replace this with our <HealthChart> component */}
-        <div className="text-center text-gray-400">
-          Chart will go here.
-        </div>
-      </div>
+      {/* 2. Health Chart Section */}
+<div className="p-4 bg-gray-800 border border-gray-700 rounded-lg">
+  <h3 className="text-2xl font-bold text-white mb-3">
+    Local Health Indicators
+  </h3>
+
+  {/* This now uses our new component, passing the data to it */}
+  <HealthChart healthData={data.healthData} />
+
+</div>
 
       {/* 3. Charities Section (Placeholder) */}
       <div className="p-4 bg-gray-800 border border-gray-700 rounded-lg">
