@@ -1,34 +1,42 @@
-// This tells Next.js that this page is interactive (it will have a search bar).
 "use client"; 
-
-// 'useState' is our "memory" for this component.
 import { useState } from 'react';
+import SearchBar from '@/components/SearchBar'; // We created this
+import Results from '@/components/Results'; // This is correct
 
-// This is our main page
 export default function Home() {
-  
-  // Create two "memory boxes"
-  // 1. 'results' will remember the data we get from our API.
-  // 2. 'isLoading' will remember if we are currently searching.
   const [results, setResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // This function will run when a user clicks "Search"
+  // --- THIS FUNCTION IS NOW UPDATED ---
   const handleSearch = async (postcode) => {
-    setIsLoading(true); // Tell the app we are loading
-    setResults(null); // Clear old results
+    setIsLoading(true); 
+    setResults(null); 
     
-    // We'll make this part work in a later step
-    console.log("Searching for:", postcode);
-    
-    setIsLoading(false); // Tell the app we are done loading
-  };
+    try {
+      // 1. Call our own API endpoint
+      const response = await fetch(`/api/get_data?postcode=${postcode}`);
+      
+      if (!response.ok) {
+        throw new Error('Something went wrong. Please try again.');
+      }
+      
+      // 2. Get the data and save it in our 'results' memory
+      const data = await response.json();
+      setResults(data); 
+      console.log("API Response:", data); // Log the data to the console
 
-  // This is the HTML structure of our page
+    } catch (error) {
+      console.error(error);
+    }
+
+    setIsLoading(false); 
+  };
+  // --- END OF UPDATE ---
+
   return (
     <main className="max-w-3xl mx-auto p-4 md:p-8">
       
-      {/* Header Section */}
+      {/* Header Section (This is correct) */}
       <header className="text-center my-10">
         <h1 className="text-4xl md:text-5xl font-bold text-white">
           Seasons Insights
@@ -38,28 +46,20 @@ export default function Home() {
         </p>
       </header>
 
-      {/* Search Section (This is a placeholder for now) */}
+      {/* Search Section (This is correct) */}
       <div className="mb-8">
-        <div className="flex gap-2">
-          <input 
-            type="text" 
-            placeholder="Enter a UK Postcode (e.g., SW1A 0AA)"
-            className="flex-grow text-lg p-3 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button className="text-lg font-semibold p-3 px-6 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
-            Search
-          </button>
-        </div>
+        <SearchBar onSearch={handleSearch} isLoading={isLoading} />
       </div>
 
-      {/* Results Section */}
+      {/* --- THIS SECTION IS NOW UPDATED --- */}
       <div>
-        {/* If we are loading, show a "Loading..." message */}
+        {/* 1. Show loading message */}
         {isLoading && <p className="text-center text-gray-400">Loading...</p>}
         
-        {/* Later, we will put our <Results> component here */}
-        {/* {results && <Results data={results} />} */}
+        {/* 2. When we have results, pass them to the Results component */}
+        {results && <Results data={results} />}
       </div>
+      {/* --- END OF UPDATE --- */}
 
     </main>
   );
