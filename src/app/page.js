@@ -1,103 +1,66 @@
-import Image from "next/image";
+// This tells Next.js that this page is interactive (it will have a search bar).
+"use client"; 
 
+// 'useState' is our "memory" for this component.
+import { useState } from 'react';
+
+// This is our main page
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  
+  // Create two "memory boxes"
+  // 1. 'results' will remember the data we get from our API.
+  // 2. 'isLoading' will remember if we are currently searching.
+  const [results, setResults] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // This function will run when a user clicks "Search"
+  const handleSearch = async (postcode) => {
+    setIsLoading(true); // Tell the app we are loading
+    setResults(null); // Clear old results
+    
+    // We'll make this part work in a later step
+    console.log("Searching for:", postcode);
+    
+    setIsLoading(false); // Tell the app we are done loading
+  };
+
+  // This is the HTML structure of our page
+  return (
+    <main className="max-w-3xl mx-auto p-4 md:p-8">
+      
+      {/* Header Section */}
+      <header className="text-center my-10">
+        <h1 className="text-4xl md:text-5xl font-bold text-white">
+          Seasons Insights
+        </h1>
+        <p className="text-lg md:text-xl text-gray-400 mt-2">
+          Mental health data for your community
+        </p>
+      </header>
+
+      {/* Search Section (This is a placeholder for now) */}
+      <div className="mb-8">
+        <div className="flex gap-2">
+          <input 
+            type="text" 
+            placeholder="Enter a UK Postcode (e.g., SW1A 0AA)"
+            className="flex-grow text-lg p-3 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button className="text-lg font-semibold p-3 px-6 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+            Search
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+
+      {/* Results Section */}
+      <div>
+        {/* If we are loading, show a "Loading..." message */}
+        {isLoading && <p className="text-center text-gray-400">Loading...</p>}
+        
+        {/* Later, we will put our <Results> component here */}
+        {/* {results && <Results data={results} />} */}
+      </div>
+
+    </main>
   );
 }
