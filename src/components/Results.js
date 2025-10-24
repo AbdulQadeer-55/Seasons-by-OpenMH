@@ -1,16 +1,26 @@
+"use client";
+
 import HealthChart from '@/components/HealthChart';
-// This component will receive all the data from our API
+import CharityListItem from '@/components/CharityListItem';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the CharityMap
+const CharityMap = dynamic(() => import('@/components/CharityMap'), {
+  ssr: false,
+  loading: () => <p className="text-center text-gray-400">Loading map...</p>
+});
+
 export default function Results({ data }) {
   
-  // 'data' will look like this:
-  // { areaName: "Westminster", region: "London", ... }
-
   return (
-    <div className="space-y-8">
+    // --- THIS IS UPDATED ---
+    // Add more spacing between cards (space-y-12)
+    <div className="space-y-12">
       
       {/* 1. AI Recommendations Section */}
-      <div className="p-4 bg-gray-800 border border-gray-700 rounded-lg">
-        <h3 className="text-2xl font-bold text-white mb-3">
+      {/* We make the padding and title cleaner */}
+      <div className="p-6 bg-gray-800 border border-gray-700 rounded-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">
           Key Insights for {data.areaName}
         </h3>
         <ul className="list-disc pl-5 space-y-2 text-gray-300">
@@ -21,24 +31,33 @@ export default function Results({ data }) {
       </div>
 
       {/* 2. Health Chart Section */}
-<div className="p-4 bg-gray-800 border border-gray-700 rounded-lg">
-  <h3 className="text-2xl font-bold text-white mb-3">
-    Local Health Indicators
-  </h3>
-
-  {/* This now uses our new component, passing the data to it */}
-  <HealthChart healthData={data.healthData} />
-
-</div>
-
-      {/* 3. Charities Section (Placeholder) */}
-      <div className="p-4 bg-gray-800 border border-gray-700 rounded-lg">
-        <h3 className="text-2xl font-bold text-white mb-3">
-          Local Support Services
+      <div className="p-6 bg-gray-800 border border-gray-700 rounded-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">
+          Local Health Indicators
         </h3>
-        {/* We will replace this with our <CharityMap> component */}
-        <div className="text-center text-gray-400">
-          Map will go here.
+        <HealthChart healthData={data.healthData} />
+      </div>
+
+      {/* 3. Charities Section */}
+      <div className="p-6 bg-gray-800 border border-gray-700 rounded-lg">
+        <h3 className="text-xl font-semibold text-white mb-4">
+          Local Support Services in {data.region}
+        </h3>
+        
+        {/* Map */}
+        <div className="mb-6">
+          <CharityMap charities={data.charities} areaName={data.areaName} />
+        </div>
+
+        {/* List */}
+        <div className="space-y-4">
+          {data.charities.length > 0 ? (
+            data.charities.map((charity) => (
+              <CharityListItem key={charity.id} charity={charity} />
+            ))
+          ) : (
+            <p className="text-gray-400">No specific charities found for this search.</p>
+          )}
         </div>
       </div>
 
