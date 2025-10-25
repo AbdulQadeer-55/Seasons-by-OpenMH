@@ -22,14 +22,18 @@ ChartJS.register(
 
 export default function HealthChart({ healthData }) {
 
-  // Error handling (unchanged)
-  if (!healthData || !Array.isArray(healthData) || healthData.length < 2) {
+  // --- THIS CHECK IS NOW SIMPLER ---
+  // We only need to check if the array exists and has at least two items
+  // (We don't expect null anymore, only real or mock data)
+  if (!Array.isArray(healthData) || healthData.length < 2) {
+    // This message should rarely appear now, unless the API structure is broken
     return (
       <div className="text-center text-red-400 py-4">
-        Could not load chart data. The data source may be unavailable.
+        Invalid chart data format received.
       </div>
     );
   }
+  // --- END OF UPDATED CHECK ---
 
   // Format data for Chart.js
   const data = {
@@ -38,57 +42,55 @@ export default function HealthChart({ healthData }) {
       {
         label: 'Indicator Value',
         data: healthData.map(d => d?.value || 0),
-        // Use palette colors
         backgroundColor: [
-          'rgba(88, 166, 255, 0.7)', // Accent blue with transparency
-          'rgba(139, 148, 158, 0.7)', // Secondary text gray with transparency
+          'rgba(88, 166, 255, 0.7)', // Accent blue
+          'rgba(139, 148, 158, 0.7)', // Secondary gray
         ],
         borderColor: [
-          'rgb(88, 166, 255)', // Accent blue
-          'rgb(139, 148, 158)', // Secondary text gray
+          'rgb(88, 166, 255)',
+          'rgb(139, 148, 158)',
         ],
         borderWidth: 1,
-        borderRadius: 4, // Add slight rounding to bars
+        borderRadius: 4,
       },
     ],
   };
 
-  // Update options for new palette
+  // Chart options (unchanged)
   const options = {
     responsive: true,
-    maintainAspectRatio: false, // Allow height adjustment
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       title: {
         display: true,
         text: 'Local vs. National Comparison',
-        color: '#E6EDF3', // Primary text
+        color: '#E6EDF3',
         font: { size: 16 }
       },
-      tooltip: { // Style tooltips
-        backgroundColor: '#0D1117', // Primary bg
+      tooltip: {
+        backgroundColor: '#0D1117',
         titleColor: '#E6EDF3',
         bodyColor: '#E6EDF3',
-        borderColor: '#30363D', // Border
+        borderColor: '#30363D',
         borderWidth: 1,
       }
     },
     scales: {
       y: {
-        beginAtZero: true, // Ensure Y axis starts at 0
-        ticks: { color: '#8B949E' }, // Secondary text
-        grid: { color: 'rgba(48, 54, 61, 0.5)' } // Lighter border color for grid
+        beginAtZero: true,
+        ticks: { color: '#8B949E' },
+        grid: { color: 'rgba(48, 54, 61, 0.5)' }
       },
       x: {
-        ticks: { color: '#8B949E' }, // Secondary text
-        grid: { display: false } // Hide vertical grid lines for cleaner look
+        ticks: { color: '#8B949E' },
+        grid: { display: false }
       }
     }
   };
 
-  // Add a wrapper div to control height
   return (
-      <div style={{ height: '300px' }}> {/* Set a fixed height */}
+      <div style={{ height: '300px' }}>
           <Bar options={options} data={data} />
       </div>
   );
