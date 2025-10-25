@@ -1,32 +1,30 @@
-// This is the new, simpler "list item" design
-
 export default function CharityListItem({ charity }) {
   const name = charity.names[0].value;
-  
+
   return (
-    // A simple border on the bottom, not a full card
-    <div className="border-b border-gray-700 py-4">
-      <h4 className="text-lg font-semibold text-blue-400">{name}</h4>
-      
-      {/* Simplified contact info */}
-      <div className="flex flex-wrap gap-3 mt-2">
+    // Use palette colors, add hover effect
+    <div className="border-b border-[color:var(--border-primary)] py-4 transition-colors duration-150 hover:bg-white/5">
+      <h4 className="text-lg font-semibold text-[color:var(--accent-primary)] mb-1">{name}</h4>
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
         {charity.website && (
-          <a 
-            href={charity.website} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-sm text-gray-300 hover:text-white"
+          <a
+            href={charity.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            // Use accent color for link
+            className="text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--accent-hover)] hover:underline"
           >
             Website
           </a>
         )}
         {charity.contact.phone && (
-          <span className="text-sm text-gray-300">
+          <span className="text-sm text-[color:var(--text-secondary)]">
             {charity.contact.phone}
           </span>
         )}
         {charity.contact.email && (
-          <span className="text-sm text-gray-300">
+          <span className="text-sm text-[color:var(--text-secondary)]">
             {charity.contact.email}
           </span>
         )}

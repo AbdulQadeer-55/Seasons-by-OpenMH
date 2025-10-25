@@ -22,9 +22,7 @@ ChartJS.register(
 
 export default function HealthChart({ healthData }) {
 
-  // --- THIS IS THE NEW CHECK ---
-  // If healthData is null, empty, or doesn't have the expected structure,
-  // show an error message instead of trying to render the chart.
+  // Error handling (unchanged)
   if (!healthData || !Array.isArray(healthData) || healthData.length < 2) {
     return (
       <div className="text-center text-red-400 py-4">
@@ -32,53 +30,66 @@ export default function HealthChart({ healthData }) {
       </div>
     );
   }
-  // --- END OF NEW CHECK ---
 
   // Format data for Chart.js
   const data = {
-    // Check if labels exist before mapping
-    labels: healthData.map(d => d?.label || 'Unknown'), 
+    labels: healthData.map(d => d?.label || 'Unknown'),
     datasets: [
       {
         label: 'Indicator Value',
-         // Check if values exist before mapping
         data: healthData.map(d => d?.value || 0),
+        // Use palette colors
         backgroundColor: [
-          'rgba(74, 144, 226, 0.6)', // Blue
-          'rgba(156, 163, 175, 0.6)', // Gray
+          'rgba(88, 166, 255, 0.7)', // Accent blue with transparency
+          'rgba(139, 148, 158, 0.7)', // Secondary text gray with transparency
         ],
         borderColor: [
-          'rgba(74, 144, 226, 1)',
-          'rgba(156, 163, 175, 1)',
+          'rgb(88, 166, 255)', // Accent blue
+          'rgb(139, 148, 158)', // Secondary text gray
         ],
         borderWidth: 1,
+        borderRadius: 4, // Add slight rounding to bars
       },
     ],
   };
 
-  // Chart options (unchanged)
+  // Update options for new palette
   const options = {
     responsive: true,
+    maintainAspectRatio: false, // Allow height adjustment
     plugins: {
       legend: { display: false },
       title: {
         display: true,
         text: 'Local vs. National Comparison',
-        color: '#EAEAEA', 
+        color: '#E6EDF3', // Primary text
         font: { size: 16 }
       },
+      tooltip: { // Style tooltips
+        backgroundColor: '#0D1117', // Primary bg
+        titleColor: '#E6EDF3',
+        bodyColor: '#E6EDF3',
+        borderColor: '#30363D', // Border
+        borderWidth: 1,
+      }
     },
     scales: {
       y: {
-        ticks: { color: '#EAEAEA' }, 
-        grid: { color: 'rgba(255, 255, 255, 0.1)' } 
+        beginAtZero: true, // Ensure Y axis starts at 0
+        ticks: { color: '#8B949E' }, // Secondary text
+        grid: { color: 'rgba(48, 54, 61, 0.5)' } // Lighter border color for grid
       },
       x: {
-        ticks: { color: '#EAEAEA' }, 
-        grid: { color: 'rgba(255, 255, 255, 0.1)' } 
+        ticks: { color: '#8B949E' }, // Secondary text
+        grid: { display: false } // Hide vertical grid lines for cleaner look
       }
     }
   };
 
-  return <Bar options={options} data={data} />;
+  // Add a wrapper div to control height
+  return (
+      <div style={{ height: '300px' }}> {/* Set a fixed height */}
+          <Bar options={options} data={data} />
+      </div>
+  );
 }

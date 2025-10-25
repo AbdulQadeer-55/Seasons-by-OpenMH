@@ -4,48 +4,47 @@ import HealthChart from '@/components/HealthChart';
 import CharityListItem from '@/components/CharityListItem';
 import dynamic from 'next/dynamic';
 
-// Dynamically import the CharityMap
+// Dynamic import for CharityMap (unchanged)
 const CharityMap = dynamic(() => import('@/components/CharityMap'), {
   ssr: false,
-  loading: () => <p className="text-center text-gray-400">Loading map...</p>
+  loading: () => <p className="text-center text-[color:var(--text-secondary)] py-4">Loading map...</p>
 });
 
+// Helper component for styled cards
+const ResultCard = ({ title, children }) => (
+  <div className="p-6 bg-[color:var(--bg-secondary)] border border-[color:var(--border-primary)] rounded-xl shadow-md">
+    <h3 className="text-xl font-semibold text-[color:var(--text-primary)] mb-4">
+      {title}
+    </h3>
+    {children}
+  </div>
+);
+
+
 export default function Results({ data }) {
-  
+
   return (
-    // --- THIS IS UPDATED ---
-    // Add more spacing between cards (space-y-12)
+    // Increased spacing between cards
     <div className="space-y-12">
-      
+
       {/* 1. AI Recommendations Section */}
-      {/* We make the padding and title cleaner */}
-      <div className="p-6 bg-gray-800 border border-gray-700 rounded-lg">
-        <h3 className="text-xl font-semibold text-white mb-4">
-          Key Insights for {data.areaName}
-        </h3>
-        <ul className="list-disc pl-5 space-y-2 text-gray-300">
+      <ResultCard title={`Key Insights for ${data.areaName}`}>
+        <ul className="list-disc pl-5 space-y-2 text-[color:var(--text-secondary)]">
           {data.recommendations.map((rec, index) => (
             <li key={index}>{rec}</li>
           ))}
         </ul>
-      </div>
+      </ResultCard>
 
       {/* 2. Health Chart Section */}
-      <div className="p-6 bg-gray-800 border border-gray-700 rounded-lg">
-        <h3 className="text-xl font-semibold text-white mb-4">
-          Local Health Indicators
-        </h3>
+      <ResultCard title="Local Health Indicators">
         <HealthChart healthData={data.healthData} />
-      </div>
+      </ResultCard>
 
       {/* 3. Charities Section */}
-      <div className="p-6 bg-gray-800 border border-gray-700 rounded-lg">
-        <h3 className="text-xl font-semibold text-white mb-4">
-          Local Support Services in {data.region}
-        </h3>
-        
+      <ResultCard title={`Local Support Services in ${data.region || data.areaName}`}>
         {/* Map */}
-        <div className="mb-6">
+        <div className="mb-6 rounded-lg overflow-hidden border border-[color:var(--border-primary)]"> {/* Added border */}
           <CharityMap charities={data.charities} areaName={data.areaName} />
         </div>
 
@@ -56,10 +55,10 @@ export default function Results({ data }) {
               <CharityListItem key={charity.id} charity={charity} />
             ))
           ) : (
-            <p className="text-gray-400">No specific charities found for this search.</p>
+            <p className="text-[color:var(--text-secondary)]">No specific charities found for this search.</p>
           )}
         </div>
-      </div>
+      </ResultCard>
 
     </div>
   );

@@ -1,26 +1,67 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* Define our color palette as CSS variables */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-primary: #0D1117;
+  --bg-secondary: #161B22;
+  --border-primary: #30363D;
+  --text-primary: #E6EDF3;
+  --text-secondary: #8B949E;
+  --accent-primary: #58A6FF;
+  --accent-hover: #79C0FF;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Apply base styles */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  /* Optional: Add a subtle gradient */
+  background-image: linear-gradient(180deg, var(--bg-primary) 0%, #10141b 100%);
+  min-height: 100vh; /* Ensure gradient covers full height */
 }
+
+/* Style scrollbars for a more modern look (optional) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--border-primary);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-secondary);
+}
+
+/* --- NEW: Three Dots Loading Animation --- */
+@keyframes blink {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+.loading-dots span {
+  animation-name: blink;
+  animation-duration: 1.4s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  display: inline-block; /* Needed for animation */
+  margin: 0 1px; /* Spacing between dots */
+  width: 6px; /* Size of dots */
+  height: 6px; /* Size of dots */
+  border-radius: 50%; /* Make them round */
+  background-color: currentColor; /* Use text color */
+}
+
+/* Stagger the animation start for each dot */
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+/* --- END OF NEW ANIMATION --- */
