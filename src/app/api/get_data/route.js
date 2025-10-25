@@ -15,18 +15,18 @@ async function getPostcodeInfo(postcode) {
   }
 }
 
-// 2. Fetches data from CharityBase
-async function searchCharities(region) {
-  // We use your personal API key from the .env.local file
+// 2. --- THIS FUNCTION IS NOW UPDATED ---
+// Fetches data from CharityBase using postcode + distance
+async function searchCharities(postcode) {
   const CHARITYBASE_API_KEY = process.env.CHARITY_API_KEY; 
   const CHARITYBASE_URL = "https://charitybase.uk/api/graphql";
 
-  // --- THIS QUERY IS NOW UPDATED ---
-  // We added "geo { latitude longitude }" to the contact section
+  // We change the query to accept a postcode ($address)
+  // and remove the invalid region filter
   const query = `
-    query SearchCharities($region: String) {
+    query SearchCharities($address: String) {
       CHC {
-        getCharities(filters: { search: "mental health", geo: { region: $region } }) {
+        getCharities(filters: { search: "mental health", geo: { address: $address, distance: "10mi" } }) {
           list(limit: 10) {
             id
             names { value }
@@ -46,27 +46,47 @@ async function searchCharities(region) {
       }
     }
   `;
-  // --- END OF UPDATE ---
 
   try {
     const response = await axios.post(
       CHARITYBASE_URL,
-      { query: query, variables: { region: region } },
-      { headers: { 
+      // We send the postcode in the 'variables' object
+      { 
+        query: query, 
+        variables: { address: postcode } 
+      },
+      { 
+        headers: { 
           'Authorization': `Apikey ${CHARITYBASE_API_KEY}`,
           'Content-Type': 'application/json'
-      }}
+        }
+      }
     );
+
+    // Check for GraphQL errors in the response
+     if (response.data.errors) {
+       console.error("CharityBase GraphQL Error:", response.data.errors);
+       return [];
+     }
+
     return response.data.data.CHC.getCharities.list;
+    
   } catch (error) {
     console.error("Error fetching charity data:", error.message);
+    // Log detailed error if available
+     if (error.response) {
+       console.error("CharityBase HTTP Error Status:", error.response.status);
+       console.error("CharityBase HTTP Error Data:", error.response.data);
+     }
     return [];
   }
 }
+// --- END OF UPDATE ---
+
 
 // 3. Fetches REAL data from PHE Fingertips
 async function fetchIndicatorData(indicatorId, areaCode) {
-  const areaTypeId = 152; // Upper Tier Local Authority
+  const areaTypeId = 152;
   const url = `https://fingertips.phe.org.uk/api/latest_data/single_indicator_for_all_areas?indicator_id=${indicatorId}&child_area_type_id=${areaTypeId}&parent_area_code=E92000001`;
 
   try {
@@ -77,11 +97,8 @@ async function fetchIndicatorData(indicatorId, areaCode) {
     const nationalData = allData.find(d => d.AreaCode === "E92000001");
     
     if (!localData || !nationalData) {
-      console.warn("Could not find local or national data for this indicator.");
-      return [
-        { label: areaCode, value: 0 },
-        { label: "England", value: 0 }
-      ];
+      console.warn(`PHE Data Warning: Could not find local (${areaCode}) or national data for indicator ${indicatorId}.`);
+      return null; // Return null if data is incomplete
     }
     return [
       { label: localData.AreaName, value: localData.Val },
@@ -89,13 +106,18 @@ async function fetchIndicatorData(indicatorId, areaCode) {
     ];
     
   } catch (error) {
-    console.error("Error fetching PHE data:", error.message);
-    return null;
+    // Log PHE errors but don't crash the whole API call
+    console.error(`PHE Data Error for indicator ${indicatorId}: ${error.message}`);
+     if (error.response) {
+       console.error("PHE HTTP Error Status:", error.response.status);
+     }
+    return null; // Return null on error
   }
 }
 
 // 4. Generates recommendations based on REAL data
 function getSimpleAiRecommendations(healthData, areaName) {
+  // Now handles null healthData gracefully
   if (!healthData || healthData.length < 2 || healthData[0].value === 0) {
     return ["Could not generate insights for this data. Data may be unavailable for this area."];
   }
@@ -103,13 +125,12 @@ function getSimpleAiRecommendations(healthData, areaName) {
   const local = healthData[0];
   const national = healthData[1];
   const recommendations = [];
-
   const difference = local.value - national.value;
   let comparison = "similar to";
   
-  if (difference > 0.5) {
+  if (difference > (national.value * 0.1)) { // More than 10% higher
     comparison = "higher than";
-  } else if (difference < -0.5) {
+  } else if (difference < -(national.value * 0.1)) { // More than 10% lower
     comparison = "lower than";
   }
 
@@ -129,7 +150,7 @@ function getSimpleAiRecommendations(healthData, areaName) {
   return recommendations;
 }
 
-// --- Main API Function ---
+// --- Main API Function (Updated) ---
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const postcode = searchParams.get('postcode');
@@ -148,23 +169,27 @@ export async function GET(request) {
     const areaCode = postcodeInfo.codes.admin_district;
     const areaName = postcodeInfo.admin_district;
 
+    // We pass the postcode directly to searchCharities now
     const [charities, healthData] = await Promise.all([
-        searchCharities(postcodeInfo.region),
+        searchCharities(postcode), // Changed from postcodeInfo.region
         fetchIndicatorData(indicatorId, areaCode)
     ]);
     
+    // Recommendations generation is unchanged, handles null healthData
     const recommendations = getSimpleAiRecommendations(healthData, areaName);
 
+    // Return all data, even if some parts failed (like healthData)
     return NextResponse.json({
       areaName: areaName,
-      region: postcodeInfo.region,
-      healthData: healthData,
-      charities: charities, // This now includes geo-coordinates
+      region: postcodeInfo.region, // Still useful for display
+      healthData: healthData, // Will be null if PHE failed
+      charities: charities, // Should now contain charities
       recommendations: recommendations
     });
 
   } catch (error) {
-    console.error("Main API Error:", error);
-    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
+    // Catch any unexpected errors during the main process
+    console.error("Main API Process Error:", error);
+    return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
   }
 }
